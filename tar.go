@@ -256,7 +256,6 @@ func (t *Tar) untarNext(destination string, dirModeKeeper map[string]os.FileMode
 }
 
 func (t *Tar) untarFile(f File, to string, hdr *tar.Header) error {
-
 	// do not overwrite existing files, if configured
 	if !f.IsDir() && !t.OverwriteExisting && fileExists(to) {
 		return fmt.Errorf("file already exists: %s", to)
@@ -558,7 +557,7 @@ func (t *Tar) Extract(source, target, destination string) error {
 				th.Linkname = filepath.Join(filepath.Base(filepath.Dir(th.Linkname)), filepath.Base(th.Linkname))
 			}
 
-			err = t.untarFile(f, destination, th)
+			err = t.untarFile(f, filepath.Join(destination, th.Name), th)
 			if err != nil {
 				return fmt.Errorf("extracting file %s: %v", th.Name, err)
 			}

@@ -301,6 +301,7 @@ func restoreDirMode(dirModeKeeper map[string]os.FileMode) error {
 
 func addDirAndModeToKeeper(dirModeKeeper map[string]os.FileMode, destination string, f File) {
 	if f.IsDir() {
+		// Keep the Octal representation
 		dirModeKeeper[destination] = f.Mode().Perm()
 	}
 }

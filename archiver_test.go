@@ -539,7 +539,7 @@ func TestRestoreDirMode(t *testing.T) {
 		t.Fatalf("Error creating test directory: %s", err)
 	}
 
-	defer func() { // Clean up after the test
+	defer func() {
 		err = os.RemoveAll(testDir)
 		if err != nil {
 			t.Errorf("failed to clean up temporary directory in TestRestoreDirMode:\n%s", err.Error())

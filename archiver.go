@@ -299,6 +299,12 @@ func restoreDirMode(dirModeKeeper map[string]os.FileMode) error {
 	return nil
 }
 
+func addDirAndModeToKeeper(dirModeKeeper map[string]os.FileMode, destination string, f File) {
+	if f.IsDir() {
+		dirModeKeeper[destination] = f.Mode().Perm()
+	}
+}
+
 func writeNewFile(fpath string, in io.Reader, fm os.FileMode) error {
 	err := os.MkdirAll(filepath.Dir(fpath), 0755)
 	if err != nil {

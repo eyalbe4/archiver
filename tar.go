@@ -228,10 +228,6 @@ func (t *Tar) untarNext(destination string, dirModeKeeper map[string]os.FileMode
 	}
 	defer f.Close()
 
-	if f.IsDir() {
-		dirModeKeeper[f.Name()] = f.Mode().Perm()
-	}
-
 	header, ok := f.Header.(*tar.Header)
 	if !ok {
 		return fmt.Errorf("expected header to be *tar.Header but was %T", f.Header)
@@ -252,11 +248,14 @@ func (t *Tar) untarNext(destination string, dirModeKeeper map[string]os.FileMode
 			header.Name = header.Name[slash+1:]
 		}
 	}
-	return t.untarFile(f, destination, header)
+
+	to := filepath.Join(destination, header.Name)
+	addDirAndModeToKeeper(dirModeKeeper, to, f)
+
+	return t.untarFile(f, to, header)
 }
 
-func (t *Tar) untarFile(f File, destination string, hdr *tar.Header) error {
-	to := filepath.Join(destination, hdr.Name)
+func (t *Tar) untarFile(f File, to string, hdr *tar.Header) error {
 
 	// do not overwrite existing files, if configured
 	if !f.IsDir() && !t.OverwriteExisting && fileExists(to) {
@@ -271,7 +270,7 @@ func (t *Tar) untarFile(f File, destination string, hdr *tar.Header) error {
 	case tar.TypeSymlink:
 		return writeNewSymbolicLink(to, hdr.Linkname)
 	case tar.TypeLink:
-		return writeNewHardLink(to, filepath.Join(destination, hdr.Linkname))
+		return writeNewHardLink(to, filepath.Join(strings.TrimSuffix(to, hdr.Name), hdr.Linkname))
 	case tar.TypeXGlobalHeader:
 		return nil // ignore the pax global header from git-generated tarballs
 	default:

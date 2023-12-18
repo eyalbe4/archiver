@@ -163,10 +163,6 @@ func (r *Rar) unrarNext(to string, dirModeKeeper map[string]os.FileMode) error {
 	}
 	defer f.Close()
 
-	if f.IsDir() {
-		dirModeKeeper[f.Name()] = f.Mode().Perm()
-	}
-
 	header, ok := f.Header.(*rardecode.FileHeader)
 	if !ok {
 		return fmt.Errorf("expected header to be *rardecode.FileHeader but was %T", f.Header)
@@ -188,7 +184,10 @@ func (r *Rar) unrarNext(to string, dirModeKeeper map[string]os.FileMode) error {
 		}
 	}
 
-	return r.unrarFile(f, filepath.Join(to, header.Name))
+	to = filepath.Join(to, header.Name)
+	addDirAndModeToKeeper(dirModeKeeper, to, f)
+
+	return r.unrarFile(f, to)
 }
 
 func (r *Rar) unrarFile(f File, to string) error {

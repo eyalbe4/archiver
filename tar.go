@@ -158,9 +158,9 @@ func (t *Tar) Unarchive(source, destination string) error {
 		return fmt.Errorf("opening tar archive for reading: %v", err)
 	}
 	defer t.Close()
-
+	dirModeKeeper := make(map[string]os.FileMode)
 	for {
-		err := t.untarNext(destination)
+		err := t.untarNext(destination, dirModeKeeper)
 		if err == io.EOF {
 			break
 		}
@@ -173,7 +173,7 @@ func (t *Tar) Unarchive(source, destination string) error {
 		}
 	}
 
-	return nil
+	return restoreDirMode(dirModeKeeper)
 }
 
 // addTopLevelFolder scans the files contained inside
@@ -221,12 +221,16 @@ func (t *Tar) addTopLevelFolder(sourceArchive, destination string) (string, erro
 	return destination, nil
 }
 
-func (t *Tar) untarNext(destination string) error {
+func (t *Tar) untarNext(destination string, dirModeKeeper map[string]os.FileMode) error {
 	f, err := t.Read()
 	if err != nil {
 		return err // don't wrap error; calling loop must break on io.EOF
 	}
 	defer f.Close()
+
+	if f.IsDir() {
+		dirModeKeeper[f.Name()] = f.Mode()
+	}
 
 	header, ok := f.Header.(*tar.Header)
 	if !ok {
@@ -261,7 +265,7 @@ func (t *Tar) untarFile(f File, destination string, hdr *tar.Header) error {
 
 	switch hdr.Typeflag {
 	case tar.TypeDir:
-		return mkdir(to, f.Mode())
+		return mkdir(to, 0755)
 	case tar.TypeReg, tar.TypeRegA, tar.TypeChar, tar.TypeBlock, tar.TypeFifo, tar.TypeGNUSparse:
 		return writeNewFile(to, f, f.Mode())
 	case tar.TypeSymlink:

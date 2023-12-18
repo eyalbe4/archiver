@@ -229,7 +229,7 @@ func (t *Tar) untarNext(destination string, dirModeKeeper map[string]os.FileMode
 	defer f.Close()
 
 	if f.IsDir() {
-		dirModeKeeper[f.Name()] = f.Mode()
+		dirModeKeeper[f.Name()] = f.Mode().Perm()
 	}
 
 	header, ok := f.Header.(*tar.Header)

@@ -272,7 +272,7 @@ func (z *Zip) extractNext(to string, dirModeKeeper map[string]os.FileMode) error
 	to = filepath.Join(to, header.Name)
 	// if a directory, no content; simply make the directory and return
 	if f.IsDir() {
-		dirModeKeeper[f.Name()] = f.Mode()
+		dirModeKeeper[f.Name()] = f.Mode().Perm()
 		return mkdir(to, 0755)
 	}
 

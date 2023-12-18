@@ -164,7 +164,7 @@ func (r *Rar) unrarNext(to string, dirModeKeeper map[string]os.FileMode) error {
 	defer f.Close()
 
 	if f.IsDir() {
-		dirModeKeeper[f.Name()] = f.Mode()
+		dirModeKeeper[f.Name()] = f.Mode().Perm()
 	}
 
 	header, ok := f.Header.(*rardecode.FileHeader)

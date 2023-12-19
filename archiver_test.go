@@ -533,12 +533,11 @@ func TestSafeExtraction(t *testing.T) {
 }
 
 func TestRestoreDirMode(t *testing.T) {
-	testDir := "testDir" // Prepare a temporary directory for testing
+	testDir := "testDir"
 	err := os.Mkdir(testDir, 0755)
 	if err != nil {
 		t.Fatalf("Error creating test directory: %s", err)
 	}
-
 	defer func() {
 		err = os.RemoveAll(testDir)
 		if err != nil {
@@ -546,9 +545,9 @@ func TestRestoreDirMode(t *testing.T) {
 		}
 	}()
 
-	originalMode := os.FileMode(0755).Perm() // Store original directory mode
+	originalMode := os.FileMode(0755) // Store original directory mode
+	newMode := os.FileMode(0700)      // Apply some changes to the directory mode
 
-	newMode := os.FileMode(0700).Perm() // Apply some changes to the directory mode
 	err = os.Chmod(testDir, newMode)
 	if err != nil {
 		t.Fatalf("error changing directory mode: %s", err)
@@ -568,8 +567,8 @@ func TestRestoreDirMode(t *testing.T) {
 		t.Fatalf("error getting directory info: %s", err)
 	}
 
-	if fileInfo.Mode().Perm() != originalMode {
-		t.Errorf("directory mode not restored. Expected: %v, Actual: %v", originalMode, fileInfo.Mode().Perm())
+	if fileInfo.Mode() != originalMode {
+		t.Errorf("directory mode not restored. Expected: %v, Actual: %v", originalMode, fileInfo.Mode())
 	}
 }
 

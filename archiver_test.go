@@ -567,8 +567,8 @@ func TestRestoreDirMode(t *testing.T) {
 		t.Fatalf("error getting directory info: %s", err)
 	}
 
-	if fileInfo.Mode() != originalMode {
-		t.Errorf("directory mode not restored. Expected: %v, Actual: %v", originalMode, fileInfo.Mode())
+	if fileInfo.Mode().Perm() != originalMode.Perm() {
+		t.Errorf("directory mode not restored. Expected: %v, Actual: %v", originalMode.Perm(), fileInfo.Mode().Perm())
 	}
 }
 

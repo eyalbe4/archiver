@@ -569,7 +569,7 @@ func TestRestoreDirMode(t *testing.T) {
 	}
 
 	if fileInfo.Mode().Perm() != originalMode {
-		t.Errorf("directory mode not restored. Expected: %s, Actual: %s", originalMode, fileInfo.Mode().Perm())
+		t.Errorf("directory mode not restored. Expected: %v, Actual: %v", originalMode, fileInfo.Mode().Perm())
 	}
 }
 

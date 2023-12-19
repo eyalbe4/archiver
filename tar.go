@@ -240,12 +240,12 @@ func (t *Tar) untarNext(destination string, dirModeKeeper map[string]os.FileMode
 	}
 
 	if t.StripComponents > 0 {
-		if strings.Count(header.Name, string(os.PathSeparator)) < t.StripComponents {
+		if strings.Count(header.Name, "/") < t.StripComponents {
 			return nil // skip path with fewer components
 		}
 
 		for i := 0; i < t.StripComponents; i++ {
-			slash := strings.Index(header.Name, string(os.PathSeparator))
+			slash := strings.Index(header.Name, "/")
 			header.Name = header.Name[slash+1:]
 		}
 	}

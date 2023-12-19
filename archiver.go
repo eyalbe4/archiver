@@ -47,7 +47,6 @@ package archiver
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -293,13 +292,9 @@ func mkdir(dirPath string, dirMode os.FileMode) error {
 // Restore the original directories mode after the Unarchive operation
 func restoreDirMode(dirModeKeeper map[string]os.FileMode) error {
 	for dirname, mode := range dirModeKeeper {
-		fi, _ := os.Stat(dirname)
-		log.Printf("current mode is: %v", fi.Mode().Perm())
 		if err := os.Chmod(dirname, mode); err != nil {
 			return err
 		}
-		fi, _ = os.Stat(dirname)
-		log.Printf("changed mode is: %v", fi.Mode().Perm())
 	}
 	return nil
 }

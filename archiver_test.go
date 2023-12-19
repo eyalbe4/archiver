@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"testing"
@@ -547,8 +548,12 @@ func TestRestoreDirMode(t *testing.T) {
 
 	originalMode := os.FileMode(0755) // Store original directory mode
 	newMode := os.FileMode(0700)      // Apply some changes to the directory mode
+	fi, _ := os.Stat(testDir)
+	log.Printf("current mode is: %v", fi.Mode().Perm())
 
 	err = os.Chmod(testDir, newMode)
+	fi, _ = os.Stat(testDir)
+	log.Printf("after mode is: %v", fi.Mode().Perm())
 	if err != nil {
 		t.Fatalf("error changing directory mode: %s", err)
 	}

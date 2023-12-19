@@ -249,13 +249,12 @@ func (t *Tar) untarNext(destination string, dirModeKeeper map[string]os.FileMode
 		}
 	}
 
-	destination = filepath.Join(destination, header.Name)
-	addDirAndModeToKeeper(dirModeKeeper, destination, f)
-
+	addDirAndModeToKeeper(dirModeKeeper, filepath.Join(destination, header.Name), f)
 	return t.untarFile(f, destination, header)
 }
 
 func (t *Tar) untarFile(f File, destination string, hdr *tar.Header) error {
+	to := filepath.Join(destination, hdr.Name)
 	// do not overwrite existing files, if configured
 	if !f.IsDir() && !t.OverwriteExisting && fileExists(destination) {
 		return fmt.Errorf("file already exists: %s", destination)
@@ -263,14 +262,13 @@ func (t *Tar) untarFile(f File, destination string, hdr *tar.Header) error {
 
 	switch hdr.Typeflag {
 	case tar.TypeDir:
-		return mkdir(destination, 0755)
+		return mkdir(to, 0755)
 	case tar.TypeReg, tar.TypeRegA, tar.TypeChar, tar.TypeBlock, tar.TypeFifo, tar.TypeGNUSparse:
-		return writeNewFile(destination, f, f.Mode())
+		return writeNewFile(to, f, f.Mode())
 	case tar.TypeSymlink:
-		return writeNewSymbolicLink(destination, hdr.Linkname)
+		return writeNewSymbolicLink(to, hdr.Linkname)
 	case tar.TypeLink:
-		log.Printf("hdr.Name:%s hdr.Linkname:%s", hdr.Name, hdr.Linkname)
-		return writeNewHardLink(destination, filepath.Join(strings.TrimSuffix(destination, hdr.Name), hdr.Linkname))
+		return writeNewHardLink(to, filepath.Join(strings.TrimSuffix(destination, hdr.Name), hdr.Linkname))
 	case tar.TypeXGlobalHeader:
 		return nil // ignore the pax global header from git-generated tarballs
 	default:

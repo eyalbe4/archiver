@@ -546,9 +546,9 @@ func TestRestoreDirMode(t *testing.T) {
 		}
 	}()
 
-	originalMode := os.FileMode(0755) // Store original directory mode
+	originalMode := os.FileMode(0755).Perm() // Store original directory mode
 
-	newMode := os.FileMode(0700) // Apply some changes to the directory mode
+	newMode := os.FileMode(0700).Perm() // Apply some changes to the directory mode
 	err = os.Chmod(testDir, newMode)
 	if err != nil {
 		t.Fatalf("error changing directory mode: %s", err)
@@ -569,7 +569,7 @@ func TestRestoreDirMode(t *testing.T) {
 	}
 
 	if fileInfo.Mode().Perm() != originalMode {
-		t.Errorf("directory mode not restored. Expected: %s, Actual: %s", originalMode, fileInfo.Mode())
+		t.Errorf("directory mode not restored. Expected: %s, Actual: %s", originalMode, fileInfo.Mode().Perm())
 	}
 }
 

@@ -540,6 +540,11 @@ func TestRestoreDirMode(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error creating test directory: %s", err.Error())
 	}
+	// Apply some changes to the directory mode
+	err = os.Chmod(testDir, 0666)
+	if err != nil {
+		t.Fatalf("Error changing directory mode: %s", err.Error())
+	}
 	defer func() {
 		err = os.RemoveAll(testDir)
 		if err != nil {
@@ -571,8 +576,8 @@ func TestRestoreDirMode(t *testing.T) {
 	}
 
 	restoredMode := fileInfo.Mode()
-	if restoredMode != 0666 {
-		t.Errorf("Directory mode not restored. Expected: %o, Actual: %o", 0666, restoredMode)
+	if restoredMode.Perm() != 0666 {
+		t.Errorf("Directory mode not restored. Expected: %o, Actual: %o", 0666, restoredMode.Perm())
 	}
 }
 

@@ -551,7 +551,7 @@ func TestRestoreDirMode(t *testing.T) {
 	}
 
 	dirModeKeeper := map[string]os.FileMode{ // Store the directory mode in a map
-		testDir: 0700,
+		testDir: 448,
 	}
 
 	err = restoreDirMode(dirModeKeeper) // Restore the directory mode
@@ -564,7 +564,7 @@ func TestRestoreDirMode(t *testing.T) {
 		t.Fatalf("error getting directory info: %s", err)
 	}
 
-	if fileInfo.Mode().Perm() != 0700 {
+	if fileInfo.Mode().Perm() != 448 {
 		t.Errorf("directory mode not restored. Expected: %v, Actual: %v", 0700, fileInfo.Mode().Perm())
 	}
 }

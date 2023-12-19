@@ -256,8 +256,8 @@ func (t *Tar) untarNext(destination string, dirModeKeeper map[string]os.FileMode
 func (t *Tar) untarFile(f File, destination string, hdr *tar.Header) error {
 	to := filepath.Join(destination, hdr.Name)
 	// do not overwrite existing files, if configured
-	if !f.IsDir() && !t.OverwriteExisting && fileExists(destination) {
-		return fmt.Errorf("file already exists: %s", destination)
+	if !f.IsDir() && !t.OverwriteExisting && fileExists(to) {
+		return fmt.Errorf("file already exists: %s", to)
 	}
 
 	switch hdr.Typeflag {

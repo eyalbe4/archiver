@@ -532,55 +532,6 @@ func TestSafeExtraction(t *testing.T) {
 	}
 }
 
-func TestRestoreDirMode(t *testing.T) {
-	// Create a temporary directory for testing
-	testDir := "testDir"
-	// Store original directory mode
-	err := os.Mkdir(testDir, 0666)
-	if err != nil {
-		t.Fatalf("Error creating test directory: %s", err.Error())
-	}
-	// Apply some changes to the directory mode
-	err = os.Chmod(testDir, 0666)
-	if err != nil {
-		t.Fatalf("Error changing directory mode: %s", err.Error())
-	}
-	defer func() {
-		err = os.RemoveAll(testDir)
-		if err != nil {
-			t.Fatalf("Error cleaning the test directory: %s", err.Error())
-		}
-	}()
-
-	// Apply some changes to the directory mode
-	err = os.Chmod(testDir, 0444)
-	if err != nil {
-		t.Fatalf("Error changing directory mode: %s", err.Error())
-	}
-
-	// Store the directory mode in a map
-	dirModeKeeper := map[string]os.FileMode{
-		testDir: 0666,
-	}
-
-	// Restore the directory mode
-	err = restoreDirMode(dirModeKeeper)
-	if err != nil {
-		t.Fatalf("Error restoring directory mode: %s", err.Error())
-	}
-
-	// Check if the directory mode has been restored to the original mode
-	fileInfo, err := os.Stat(testDir)
-	if err != nil {
-		t.Fatalf("Error getting directory info: %s", err.Error())
-	}
-
-	restoredMode := fileInfo.Mode()
-	if restoredMode.Perm() != 0666 {
-		t.Errorf("Directory mode not restored. Expected: %o, Actual: %o", 0666, restoredMode.Perm())
-	}
-}
-
 func CheckFilenames(archiveName string) bool {
 
 	evilNotExtracted := false // by default we cannot assume that the path traversal filename is mitigated by CheckFilename

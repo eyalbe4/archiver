@@ -239,38 +239,38 @@ func (t *Tar) untarNext(destination string, dirModeKeeper map[string]os.FileMode
 	}
 
 	if t.StripComponents > 0 {
-		if strings.Count(header.Name, "/") < t.StripComponents {
+		if strings.Count(header.Name, string(os.PathSeparator)) < t.StripComponents {
 			return nil // skip path with fewer components
 		}
 
 		for i := 0; i < t.StripComponents; i++ {
-			slash := strings.Index(header.Name, "/")
+			slash := strings.Index(header.Name, string(os.PathSeparator))
 			header.Name = header.Name[slash+1:]
 		}
 	}
 
-	to := filepath.Join(destination, header.Name)
-	addDirAndModeToKeeper(dirModeKeeper, to, f)
+	destination = filepath.Join(destination, header.Name)
+	addDirAndModeToKeeper(dirModeKeeper, destination, f)
 
-	return t.untarFile(f, to, header)
+	return t.untarFile(f, destination, header)
 }
 
-func (t *Tar) untarFile(f File, to string, hdr *tar.Header) error {
+func (t *Tar) untarFile(f File, destination string, hdr *tar.Header) error {
 	// do not overwrite existing files, if configured
-	if !f.IsDir() && !t.OverwriteExisting && fileExists(to) {
-		return fmt.Errorf("file already exists: %s", to)
+	if !f.IsDir() && !t.OverwriteExisting && fileExists(destination) {
+		return fmt.Errorf("file already exists: %s", destination)
 	}
 
 	switch hdr.Typeflag {
 	case tar.TypeDir:
-		return mkdir(to, 0755)
+		return mkdir(destination, 0755)
 	case tar.TypeReg, tar.TypeRegA, tar.TypeChar, tar.TypeBlock, tar.TypeFifo, tar.TypeGNUSparse:
-		return writeNewFile(to, f, f.Mode())
+		return writeNewFile(destination, f, f.Mode())
 	case tar.TypeSymlink:
-		return writeNewSymbolicLink(to, hdr.Linkname)
+		return writeNewSymbolicLink(destination, hdr.Linkname)
 	case tar.TypeLink:
 		log.Printf("hdr.Name:%s hdr.Linkname:%s", hdr.Name, hdr.Linkname)
-		return writeNewHardLink(to, filepath.Join(strings.TrimSuffix(to, hdr.Name), hdr.Linkname))
+		return writeNewHardLink(destination, filepath.Join(strings.TrimSuffix(destination, hdr.Name), hdr.Linkname))
 	case tar.TypeXGlobalHeader:
 		return nil // ignore the pax global header from git-generated tarballs
 	default:

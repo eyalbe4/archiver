@@ -47,7 +47,6 @@ package archiver
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -365,7 +364,7 @@ func writeNewHardLink(fpath string, target string) error {
 			return fmt.Errorf("%s: failed to unlink: %+v", fpath, err)
 		}
 	}
-	log.Printf("target: %s, fpath: %s", target, fpath)
+
 	err = os.Link(target, fpath)
 	if err != nil {
 		return fmt.Errorf("%s: making hard link for: %v", fpath, err)

@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -249,31 +250,40 @@ func (t *Tar) untarNext(destination string, dirModeKeeper map[string]os.FileMode
 		}
 	}
 
-	addDirAndModeToKeeper(dirModeKeeper, filepath.Join(destination, header.Name), f)
+	destination = filepath.Join(destination, header.Name)
+	addDirAndModeToKeeper(dirModeKeeper, destination, f)
+
 	return t.untarFile(f, destination, header)
 }
 
 func (t *Tar) untarFile(f File, destination string, hdr *tar.Header) error {
-	to := filepath.Join(destination, hdr.Name)
 	// do not overwrite existing files, if configured
-	if !f.IsDir() && !t.OverwriteExisting && fileExists(to) {
-		return fmt.Errorf("file already exists: %s", to)
+	if !f.IsDir() && !t.OverwriteExisting && fileExists(destination) {
+		return fmt.Errorf("file already exists: %s", destination)
 	}
 
 	switch hdr.Typeflag {
 	case tar.TypeDir:
-		return mkdir(to, 0755)
+		return mkdir(destination, 0755)
 	case tar.TypeReg, tar.TypeRegA, tar.TypeChar, tar.TypeBlock, tar.TypeFifo, tar.TypeGNUSparse:
-		return writeNewFile(to, f, f.Mode())
+		return writeNewFile(destination, f, f.Mode())
 	case tar.TypeSymlink:
-		return writeNewSymbolicLink(to, hdr.Linkname)
+		return writeNewSymbolicLink(destination, hdr.Linkname)
 	case tar.TypeLink:
-		return writeNewHardLink(to, filepath.Join(strings.TrimSuffix(destination, hdr.Name), hdr.Linkname))
+		return writeNewHardLink(destination, filepath.Join(strings.TrimSuffix(destination, replaceForwardSlashes(hdr.Name)), hdr.Linkname))
 	case tar.TypeXGlobalHeader:
 		return nil // ignore the pax global header from git-generated tarballs
 	default:
 		return fmt.Errorf("%s: unknown type flag: %c", hdr.Name, hdr.Typeflag)
 	}
+}
+
+func replaceForwardSlashes(filePath string) string {
+	if runtime.GOOS == "windows" {
+		// Convert forward slashes to backslashes
+		filePath = strings.ReplaceAll(filePath, "/", "\\")
+	}
+	return filePath
 }
 
 func (t *Tar) writeWalk(source, topLevelFolder, destination string) error {

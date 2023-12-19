@@ -535,7 +535,9 @@ func TestSafeExtraction(t *testing.T) {
 func TestRestoreDirMode(t *testing.T) {
 	// Create a temporary directory for testing
 	testDir := "testDir"
-	err := os.Mkdir(testDir, 0755)
+	// Store original directory mode
+	originalMode := os.FileMode(0666)
+	err := os.Mkdir(testDir, originalMode)
 	if err != nil {
 		t.Fatalf("Error creating test directory: %s", err.Error())
 	}
@@ -546,11 +548,8 @@ func TestRestoreDirMode(t *testing.T) {
 		}
 	}()
 
-	// Store original directory mode
-	originalMode := os.FileMode(0755)
-
 	// Apply some changes to the directory mode
-	newMode := os.FileMode(0700)
+	newMode := os.FileMode(0444)
 	err = os.Chmod(testDir, newMode)
 	if err != nil {
 		t.Fatalf("Error changing directory mode: %s", err.Error())

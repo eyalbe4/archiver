@@ -6,12 +6,12 @@ import (
 	"compress/flate"
 	"flag"
 	"fmt"
+	"github.com/jfrog/archiver/v3"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/klauspost/compress/zip"
-	"github.com/mholt/archiver/v3"
 	"github.com/nwaples/rardecode"
 )
 

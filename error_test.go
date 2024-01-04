@@ -3,10 +3,9 @@ package archiver_test
 import (
 	"errors"
 	"fmt"
+	"github.com/jfrog/archiver/v3"
 	"os"
 	"testing"
-
-	"github.com/mholt/archiver/v3"
 )
 
 func TestIllegalPathErrorString(t *testing.T) {

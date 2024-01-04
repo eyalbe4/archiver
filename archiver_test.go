@@ -507,9 +507,18 @@ func TestUnarchiveWithStripComponents(t *testing.T) {
 }
 
 func TestUnarchiveZipWithPermissions(t *testing.T) {
-	testDir := t.TempDir()
+	testDir, err := ioutil.TempDir(".", "")
+	if err != nil {
+		t.Error("failed to create temp dir: " + err.Error())
+	}
+	defer func() {
+		err = os.RemoveAll(testDir)
+		if err != nil {
+			t.Error("failed to remove temp dir: " + err.Error())
+		}
+	}()
 
-	err := Unarchive(filepath.Join("testdata", "readonly", "readonlydir.zip"), testDir)
+	err = Unarchive(filepath.Join("testdata", "readonly", "readonlydir.zip"), testDir)
 	if err != nil {
 		t.Error("failed to unarchive: " + err.Error())
 	}

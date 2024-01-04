@@ -506,9 +506,38 @@ func TestUnarchiveWithStripComponents(t *testing.T) {
 	}
 }
 
+func TestUnarchiveZipWithPermissions(t *testing.T) {
+	testDir, err := ioutil.TempDir(".", "")
+	if err != nil {
+		t.Error("failed to create temp dir: " + err.Error())
+	}
+	defer func() {
+		err = os.RemoveAll(testDir)
+		if err != nil {
+			t.Error("failed to remove temp dir: " + err.Error())
+		}
+	}()
+
+	err = Unarchive(filepath.Join("testdata", "readonly", "readonlydir.zip"), testDir)
+	if err != nil {
+		t.Error("failed to unarchive: " + err.Error())
+	}
+
+	fileInfo, err := os.Stat(filepath.Join(testDir, "readonlydir"))
+	if err != nil {
+		t.Error("failed to get the `readonlydir` info: " + err.Error())
+	}
+
+	mode := fileInfo.Mode()
+
+	// Check if the directory is read-only
+	if mode.Perm()&(1<<(uint(7))) != 0 {
+		t.Error("the 'readonlydir' isn't read-only, test failed")
+	}
+}
+
 // test at runtime if the CheckFilename function is behaving properly for the archive formats
 func TestSafeExtraction(t *testing.T) {
-
 	testArchives := []string{
 		"testdata/testarchives/evilarchives/evil.zip",
 		"testdata/testarchives/evilarchives/evil.tar",
@@ -533,7 +562,6 @@ func TestSafeExtraction(t *testing.T) {
 }
 
 func CheckFilenames(archiveName string) bool {
-
 	evilNotExtracted := false // by default we cannot assume that the path traversal filename is mitigated by CheckFilename
 	safeExtracted := false    // by default we cannot assume that a benign file can be extracted successfully
 

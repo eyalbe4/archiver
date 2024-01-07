@@ -1,3 +1,13 @@
+### Forking the `mholt/archiver` Repository
+
+#### Reason for Forking
+
+The decision to fork the `mholt/archiver` repository stemmed from maintenance issues and lack of support for version 3 (`v3`). We observed persistent bugs and unresolved issues within their v3 codebase, which adversely impacted our project's functionality and stability.
+The `mholt/archiver` codebase transitioned exclusively to version 4 (`v4`), abandoning further development and support for v3. As our project heavily relied on v3 functionalities and encountered critical issues, we were compelled to maintain and address these issues in our forked repository to ensure the continued operation and stability of our application.
+
+To maintain the stability and address specific issues affecting v3 compatibility, we initiated a fork of the `mholt/archiver` repository. This forked version allows us to independently manage and resolve v3-related bugs and issues, ensuring our project remains functional and aligned with our requirements.
+
+
 # archiver [![archiver GoDoc](https://img.shields.io/badge/reference-godoc-blue.svg?style=flat-square)](https://pkg.go.dev/github.com/mholt/archiver?tab=doc) [![Ubuntu-latest](https://github.com/mholt/archiver/actions/workflows/ubuntu-latest.yml/badge.svg)](https://github.com/mholt/archiver/actions/workflows/ubuntu-latest.yml) [![Macos-latest](https://github.com/mholt/archiver/actions/workflows/macos-latest.yml/badge.svg)](https://github.com/mholt/archiver/actions/workflows/macos-latest.yml) [![Windows-latest](https://github.com/mholt/archiver/actions/workflows/windows-latest.yml/badge.svg)](https://github.com/mholt/archiver/actions/workflows/windows-latest.yml)
 
 Introducing **Archiver 3.1** - a cross-platform, multi-format archive utility and Go library. A powerful and flexible library meets an elegant CLI in this generic replacement for several platform-specific or format-specific archive utilities.

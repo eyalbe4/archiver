@@ -2,10 +2,13 @@
 
 #### Reason for Forking
 
-The decision to fork the `mholt/archiver` repository stemmed from maintenance issues and lack of support for version 3 (`v3`). We observed persistent bugs and unresolved issues within their v3 codebase, which adversely impacted our project's functionality and stability.
-The `mholt/archiver` codebase transitioned exclusively to version 4 (`v4`), abandoning further development and support for v3. As our project heavily relied on v3 functionalities and encountered critical issues, we were compelled to maintain and address these issues in our forked repository to ensure the continued operation and stability of our application.
 
-To maintain the stability and address specific issues affecting v3 compatibility, we initiated a fork of the `mholt/archiver` repository. This forked version allows us to independently manage and resolve v3-related bugs and issues, ensuring our project remains functional and aligned with our requirements.
+Reason for Creating a Fork
+The decision to create a fork of the mholt/archiver repository was motivated by our need to address maintenance issues and provide ongoing support for version 3 (v3). While utilizing their v3 codebase, we encountered persistent bugs and unresolved issues that were impacting the functionality and stability of our project.
+
+As mholt/archiver transitioned exclusively to version 4 (v4) and ceased further development and support for v3, our project, heavily reliant on v3 functionalities, encountered several issues. To ensure the continued operation and stability of our application, we took the initiative to maintain and address these concerns within our forked repository.
+
+Our decision to fork the mholt/archiver repository aimed to sustain stability and resolve specific v3-related issues affecting compatibility. This forked version grants us the autonomy to manage and rectify v3-related bugs and problems independently, guaranteeing that our project's functionality remains consistent and aligned with our specific requirements.
 
 
 # archiver [![archiver GoDoc](https://img.shields.io/badge/reference-godoc-blue.svg?style=flat-square)](https://pkg.go.dev/github.com/mholt/archiver?tab=doc) [![Ubuntu-latest](https://github.com/mholt/archiver/actions/workflows/ubuntu-latest.yml/badge.svg)](https://github.com/mholt/archiver/actions/workflows/ubuntu-latest.yml) [![Macos-latest](https://github.com/mholt/archiver/actions/workflows/macos-latest.yml/badge.svg)](https://github.com/mholt/archiver/actions/workflows/macos-latest.yml) [![Windows-latest](https://github.com/mholt/archiver/actions/workflows/windows-latest.yml/badge.svg)](https://github.com/mholt/archiver/actions/workflows/windows-latest.yml)

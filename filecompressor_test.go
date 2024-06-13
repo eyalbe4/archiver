@@ -2,19 +2,18 @@ package archiver
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 )
 
 func TestCheckExtension(t *testing.T) {
-	testdir, err := ioutil.TempDir("", "archiver_checkext_test_")
+	testdir, err := os.MkdirTemp("", "archiver_checkext_test_")
 	if err != nil {
 		t.Fatalf("Making temporary directory: %v", err)
 	}
 	defer os.RemoveAll(testdir)
-	testfile, err := ioutil.TempFile(testdir, "compressor_test_input_*.txt")
+	testfile, err := os.CreateTemp(testdir, "compressor_test_input_*.txt")
 	if err != nil {
 		t.Fatalf("Making temporary file: %v", err)
 	}

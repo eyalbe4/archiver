@@ -3,7 +3,6 @@ package archiver
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -247,7 +246,7 @@ func TestRarUnarchive(t *testing.T) {
 	au := DefaultRar
 	auStr := fmt.Sprintf("%s", au)
 
-	tmp, err := ioutil.TempDir("", "archiver_test")
+	tmp, err := os.MkdirTemp("", "archiver_test")
 	if err != nil {
 		t.Fatalf("[%s] %v", auStr, err)
 	}
@@ -304,7 +303,7 @@ func TestArchiveUnarchiveWithFolderPermissions(t *testing.T) {
 func testArchiveUnarchive(t *testing.T, au archiverUnarchiver) {
 	auStr := fmt.Sprintf("%s", au)
 
-	tmp, err := ioutil.TempDir("", "archiver_test")
+	tmp, err := os.MkdirTemp("", "archiver_test")
 	if err != nil {
 		t.Fatalf("[%s] %v", auStr, err)
 	}
@@ -430,12 +429,12 @@ func symmetricTest(t *testing.T, formatName, dest string, testSymlinks, testMode
 			return nil
 		}
 
-		expected, err := ioutil.ReadFile(origPath)
+		expected, err := os.ReadFile(origPath)
 		if err != nil {
 			t.Fatalf("[%s] %s: Couldn't open original file (%s) from disk: %v", formatName,
 				fpath, origPath, err)
 		}
-		actual, err := ioutil.ReadFile(fpath)
+		actual, err := os.ReadFile(fpath)
 		if err != nil {
 			t.Fatalf("[%s] %s: Couldn't open new file from disk: %v", formatName, fpath, err)
 		}
@@ -507,7 +506,7 @@ func TestUnarchiveWithStripComponents(t *testing.T) {
 }
 
 func TestUnarchiveZipWithPermissions(t *testing.T) {
-	testDir, err := ioutil.TempDir(".", "")
+	testDir, err := os.MkdirTemp(".", "")
 	if err != nil {
 		t.Error("failed to create temp dir: " + err.Error())
 	}

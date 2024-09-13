@@ -7,7 +7,51 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
+
+func TestMkdirAll(t *testing.T) {
+	// Use t.TempDir to create a temporary directory for the test
+	tempDir := t.TempDir()
+
+	// Construct a test path
+	testPath := filepath.Join(tempDir, "dir1", "dir2", "dir3")
+
+	// Step 1: Test directory creation with 0700 permissions (different from 0755)
+	err := os.MkdirAll(testPath, 0700)
+	assert.NoError(t, err, "Failed to create directory with 0700 permissions")
+
+	// Check that the directories were created with 0700 permissions
+	info, err := os.Stat(testPath)
+	assert.NoError(t, err, "Failed to stat directory")
+	assert.Equal(t, os.FileMode(0700), info.Mode().Perm(), "Expected directory to have permissions 0700")
+
+	// Step 2: Run MkdirAll which should change permissions to 0755
+	restore, err := mkdirAll(testPath)
+	assert.NoError(t, err, "MkdirAll failed")
+
+	// Check that the permissions were changed to 0755
+	info, err = os.Stat(testPath)
+	assert.NoError(t, err, "Failed to stat directory after MkdirAll")
+	assert.Equal(t, os.FileMode(0755), info.Mode().Perm(), "Expected directory to have permissions 0755 after MkdirAll")
+
+	// Step 3: Simulate changing the permissions to 0700 (simulating a permission modification)
+	err = os.Chmod(testPath, 0700)
+	assert.NoError(t, err, "Failed to change directory permissions to 0700")
+	info, err = os.Stat(testPath)
+	assert.NoError(t, err, "Failed to stat directory after permission change")
+	assert.Equal(t, os.FileMode(0700), info.Mode().Perm(), "Expected directory to have permissions 0700 after permission change")
+
+	// Step 4: Restore the original permissions using the deferred restore function
+	err = restore()
+	assert.NoError(t, err, "Failed to restore original permissions")
+
+	// Verify that the original permissions (0700) were restored
+	info, err = os.Stat(testPath)
+	assert.NoError(t, err, "Failed to stat directory after restoration")
+	assert.Equal(t, os.FileMode(0700), info.Mode().Perm(), "Expected directory to have restored permissions 0755")
+}
 
 func TestWithin(t *testing.T) {
 	for i, tc := range []struct {

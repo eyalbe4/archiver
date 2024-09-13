@@ -45,6 +45,7 @@
 package archiver
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -306,11 +307,76 @@ func addDirAndModeToKeeper(dirModeKeeper map[string]os.FileMode, destination str
 	}
 }
 
-func writeNewFile(fpath string, in io.Reader, fm os.FileMode) error {
-	err := os.MkdirAll(filepath.Dir(fpath), 0755)
+// MkdirAll checks if all directories in the given path exist,
+// changes their permissions to 0755 if necessary, and restores original permissions in a defer function.
+func mkdirAll(path string) (restore func() error, err error) {
+	// Save the original permissions for later restoration
+	type dirPermission struct {
+		path    string
+		oldPerm os.FileMode
+	}
+
+	// A slice to hold the original permissions for directories where we change permissions
+	var dirs []dirPermission
+
+	// Defer function to restore original permissions when finished
+	restore = func() error {
+		for _, dir := range dirs {
+			if err := os.Chmod(dir.path, dir.oldPerm); err != nil {
+				// If restoration fails, log the error but continue
+				return fmt.Errorf("failed to restore original permissions for directory %s: %v", dir.path, err)
+			}
+		}
+		return nil
+	}
+
+	// Create all directories in the path using MkdirAll
+	err = os.MkdirAll(path, 0755)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create directories %s: %v", path, err)
+	}
+
+	// Walk through all directories in the path and check permissions
+	currentPath := path
+	for currentPath != "." && currentPath != "/" {
+		info, err := os.Stat(currentPath)
+		if err != nil {
+			return nil, fmt.Errorf("error checking directory %s: %v", currentPath, err)
+		}
+
+		if info.IsDir() {
+			perm := info.Mode().Perm()
+			if perm != 0755 {
+				// Attempt to change to 0755
+				err := os.Chmod(currentPath, 0755)
+				if err == nil {
+					// Ignore cases where the permission failed to be changed, beucase this is expected.
+					// For example, the permission of system directories cannot be changed.
+					// Only save the old permissions if the permission change succeeds
+					dirs = append(dirs, dirPermission{path: currentPath, oldPerm: perm})
+				}
+			}
+		} else {
+			return nil, fmt.Errorf("expected %s to be a directory, but it is not", currentPath)
+		}
+
+		// Move to the parent directory
+		currentPath = filepath.Dir(currentPath)
+	}
+
+	return restore, nil
+}
+
+func writeNewFile(fpath string, in io.Reader, fm os.FileMode) (err error) {
+	restoreFunc, err := mkdirAll(filepath.Dir(fpath))
 	if err != nil {
 		return fmt.Errorf("%s: making directory for file: %v", fpath, err)
 	}
+	defer func() {
+		if restoreFunc != nil {
+			errors.Join(err, restoreFunc())
+		}
+	}()
 
 	out, err := os.Create(fpath)
 	if err != nil {
@@ -330,11 +396,16 @@ func writeNewFile(fpath string, in io.Reader, fm os.FileMode) error {
 	return nil
 }
 
-func writeNewSymbolicLink(fpath string, target string) error {
-	err := os.MkdirAll(filepath.Dir(fpath), 0755)
+func writeNewSymbolicLink(fpath string, target string) (err error) {
+	restoreFunc, err := mkdirAll(filepath.Dir(fpath))
 	if err != nil {
 		return fmt.Errorf("%s: making directory for file: %v", fpath, err)
 	}
+	defer func() {
+		if restoreFunc != nil {
+			errors.Join(err, restoreFunc())
+		}
+	}()
 
 	_, err = os.Lstat(fpath)
 	if err == nil {
@@ -348,14 +419,19 @@ func writeNewSymbolicLink(fpath string, target string) error {
 	if err != nil {
 		return fmt.Errorf("%s: making symbolic link for: %v", fpath, err)
 	}
-	return nil
+	return
 }
 
-func writeNewHardLink(fpath string, target string) error {
-	err := os.MkdirAll(filepath.Dir(fpath), 0755)
+func writeNewHardLink(fpath string, target string) (err error) {
+	restoreFunc, err := mkdirAll(filepath.Dir(fpath))
 	if err != nil {
 		return fmt.Errorf("%s: making directory for file: %v", fpath, err)
 	}
+	defer func() {
+		if restoreFunc != nil {
+			errors.Join(err, restoreFunc())
+		}
+	}()
 
 	_, err = os.Lstat(fpath)
 	if err == nil {
@@ -369,7 +445,7 @@ func writeNewHardLink(fpath string, target string) error {
 	if err != nil {
 		return fmt.Errorf("%s: making hard link for: %v", fpath, err)
 	}
-	return nil
+	return
 }
 
 func isSymlink(fi os.FileInfo) bool {
